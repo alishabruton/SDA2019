@@ -5,24 +5,34 @@ library("gtrendsR")
 library("reshape2")
 
 #Set the search terms you're interested in. 
-#Note that the second argument gprop=web means we're searching web (other options include news, images, youtube, and froogle [shopping]). 
-#The third argument time=all means we're searching from 2004 to now. Other time options include now 1-d, now 7-d, today 1-m, today 3-m, today 12-m, today+5-y. A final possibility for time is to specify a custom date range e.g. 2010-12-31 2011-06-30. 
+#Note that the second argument gprop=web means we're searching web (other options include news, 
+images, youtube, and froogle [shopping]). 
+#The third argument time=all means we're searching from 2004 to now. Other time options 
+include now 1-d, now 7-d, today 1-m, today 3-m, today 12-m, today+5-y. A final possibility for
+time is to specify a custom date range e.g. 2010-12-31 2011-06-30. 
 #This looks at google searches over the entire world. 
 google.trends = gtrends(c("does my son have ADHD"), gprop = "web", time = "all")[[1]]
 google.trends = dcast(google.trends, date ~ keyword + geo, value.var = "hits")
 rownames(google.trends) = google.trends$date
 google.trends$date = NULL
 
-#This should give you a table with two columns- dates and numbers. The numbers are RVUs, a number between 1-100 which quantifies how common this search was compared to all searches which could be done. It doesn't tell you how many searches were done with this term. So you can't measure the number of searches, just how the searches changed over time. 
+#This should give you a table with two columns- dates and numbers. The numbers are RVUs, 
+a number between 1-100 which quantifies how common this search was compared to all 
+searches which could be done. It doesn't tell you how many searches were done with this 
+term. So you can't measure the number of searches, just how the searches changed over time. 
 
 #You may see a warning if your time zone is not set. Fix with this code: 
 Sys.setenv(TZ = "UTC")
 
-#Set country codes if you want to search only in particular countries. This searches for Canada (CA) and New Zealand (NZ), from June 2010-June 2017. 
-google.trends2 = gtrends(c("ADHD in girls"), geo = c("CA", "NZ"), gprop = "web", time = "2010-06-30 2017-06-30")[[1]]
+#Set country codes if you want to search only in particular countries. This searches for 
+Canada (CA) and New Zealand (NZ), from June 2010-June 2017. 
+google.trends2 = gtrends(c("ADHD in girls"), geo = c("CA", "NZ"), gprop = "web", time = 
+"2010-06-30 2017-06-30")[[1]]
 google.trends2
 
-#You can find the country codes on Wikipedia. States are done like this: US-CA for California, etc. You can also use this code to retrieve the codes. This one retrieves all the codes for Italy (IT). 
+#You can find the country codes on Wikipedia. States are done like this: US-CA for 
+California, etc. You can also use this code to retrieve the codes. This one retrieves 
+all the codes for Italy (IT). 
 library(gtrendsR)
 geo.codes = sort(unique(countries[substr(countries$sub_code, 1, 2) == "IT", ]$sub_code))
 
@@ -51,16 +61,23 @@ time_trend
 library(ggplot2)
 plot<-ggplot(data=time_trend, aes(x=date, y=hits,group=keyword,col=keyword))+
   geom_line()+xlab('Time')+ylab('Relative Interest')+ theme_bw()+
-  theme(legend.title = element_blank(),legend.position="bottom",legend.text=element_text(size=12))+ggtitle("Google Search Volume")
+  theme(legend.title = element_blank(),legend.position="bottom",legend.text=
+  element_text(size=12))+ggtitle("Google Search Volume")
 plot
 
-#This should give you a lovely plot with the interest over time for each of the three search terms. 
-#You may have some outliers, for example, if there was something in the news that caused a huge spike in one of the searches. 
-#This allows you to remove any entry of hits (searches) >100 in order to remove the high outliers. 100 would be the highest possible value, so setting it to 100 doesn't change anything, but you can look at the data yourself and decide what cut off point to use. 
+#This should give you a lovely plot with the interest over time for each of the 
+three search terms. 
+#You may have some outliers, for example, if there was something in the news that 
+caused a huge spike in one of the searches. 
+#This allows you to remove any entry of hits (searches) >100 in order to remove 
+the high outliers. 100 would be the highest possible value, so setting it to 100 
+doesn't change anything, but you can look at the data yourself and decide what 
+cut off point to use. 
 time_trend2=time_trend[time_trend$hits<100,]
 plot2<-ggplot(data=time_trend2, aes(x=date, y=hits,group=keyword,col=keyword))+
   geom_line()+xlab('Time')+ylab('Relative Interest')+ theme_bw()+
-  theme(legend.title = element_blank(),legend.position="bottom",legend.text=element_text(size=12))+ggtitle("Google Search Volume")
+  theme(legend.title = element_blank(),legend.position="bottom",legend.text=element_
+  text(size=12))+ggtitle("Google Search Volume")
 plot2
 
 #You may notice some seasonality to the searches. If you want to smooth that out, use this.
@@ -72,6 +89,8 @@ plot3
 
 #Advanced: plotting the data in one step. 
 #This is great if you just want to check some searches quickly. 
-plot(gtrendsR::gtrends(keyword = c("ADHD","dementia","Alzheimers"), geo = "US", time = "2009-01-01 2019-01-01"))
-plot(gtrendsR::gtrends(keyword = c("Berlin","München","Frankfurt","Hamburg","Köln"), geo = "DE", time = "2010-01-01 2018-08-27"))
+plot(gtrendsR::gtrends(keyword = c("ADHD","dementia","Alzheimers"), geo = "US", time = 
+"2009-01-01 2019-01-01"))
+plot(gtrendsR::gtrends(keyword = c("Berlin","München","Frankfurt","Hamburg","Köln"), 
+geo = "DE", time = "2010-01-01 2018-08-27"))
 
