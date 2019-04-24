@@ -1,1 +1,16 @@
+#Load FisherHW and summarize. 
+library(psych)
+names(FisherHW)
+str(FisherHW)
+summary(FisherHW)
+
+#Run a multilinear regression with two predictor variables and one outcome variable. 
+#Use the formula: 
+#Lm(formula= outcome ~ var1 + var2, data=dataset) 
+#Using sleep and duration of pain(months) and enjoyment of life. 
+model6 <- lm(formula = FisherHW$`enjoyment of life` ~ FisherHW$sleep+ FisherHW$`Duration of pain (months)`, data=FisherHW)
+summary(model6)
+
+#Find confidence intervals.
+confint(model6)
 
