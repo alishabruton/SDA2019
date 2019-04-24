@@ -1,2 +1,4 @@
 # SDA2019
-R scripts and files for secondary data analysis/biostats 2
+Biostatistics 2 / secondary data analysis;
+R scripts for class exercises + 
+R scripts for final project
