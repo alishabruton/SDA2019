@@ -1,0 +1,31 @@
+#Week 3 Exercises
+#Summarize the dataset and look for NAs.
+summary(cp)
+
+#Find Pearson correlation coefficients for the relationships between the five student personality traits. There are 10. Use Pairwise-complete observations. 
+cor(cp[,3:7], use = "pairwise.complete")
+install.packages("Hmisc")
+library(Hmisc)
+rcorr(as.matrix(cp[,3:7]))
+
+#Run a t-test on personality traits vs. gender. 
+t.test(cp$studenta~cp$gender, data=cp,var.equal = TRUE)
+t.test(cp$studentc~cp$gender, data=cp,var.equal = TRUE)
+t.test(cp$studente~cp$gender, data=cp,var.equal = TRUE)
+t.test(cp$studentn~cp$gender, data=cp,var.equal = TRUE)
+t.test(cp$studento~cp$gender, data=cp,var.equal = TRUE)
+
+#Find the correlation between each of the five personality dimensions as self-rated and as preference for the lecturer. 
+cor.test(cp$studenta, cp$lectura)
+cor.test(cp$studentc, cp$lecturc)
+cor.test(cp$studente, cp$lecture)
+cor.test(cp$studentn, cp$lecturen)
+cor.test(cp$studento, cp$lecturo)
+
+#Conduct a linear regression to test the effects of student's age and five self-rated personality dimensions on the student's preference for agreeableness (lectura).
+modelcp <- lm(formula = cp$lectura ~ cp$age + cp$studenta  + cp$studentc + cp$studente + cp$studentn+ cp$studento, data=cp)
+summary(modelcp)
+
+#Use a linear model to test the effects of age, gender, and agreeableness on a student's preference for agreeableness. 
+model2<- lm(formula=cp$lectura~cp$age + cp$gender + cp$studenta)
+summary(model2)
