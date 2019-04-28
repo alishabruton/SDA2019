@@ -1,0 +1,94 @@
+#GoogleTrends2
+
+#First, load the required packages. Use devtools to download a developer version of gtrendsR from GitHub.
+devtools::install_github('PMassicotte/gtrendsR')
+install.packages("gtrendsR")
+install.packages("maps")
+install.packages("ggplot2")
+install.packages("lettercase")
+install.packages("viridis")
+install.packages("pals")
+install.packages("scico")
+install.packages("ggrepel")
+install.packages("tidyverse")
+library(gtrendsR)
+library(maps)
+library(ggplot2)
+library(lettercase)
+library(viridis)
+library(pals)
+library(scico)
+library(ggrepel)
+library(tidyverse)
+
+#First, we will look at how the impact of hurricanes Katrina (August 2005) and Harvey 
+#(August 2017) are reflected in how Americans have used these names as search terms 
+#over time. We'll also change some of the plot setting by creating our own ggplot theme. 
+my_theme <- function() {theme_bw() +
+    theme(panel.background = element_blank()) +
+    theme(plot.background = element_rect(fill = "seashell")) +
+    theme(panel.border = element_blank()) +             
+    theme(strip.background = element_blank()) +         
+    theme(plot.margin = unit(c(.5, .5, .5, .5), "cm")) +
+    theme(panel.spacing = unit(3, "lines")) +
+    theme(panel.grid.major = element_blank()) +
+    theme(panel.grid.minor = element_blank()) +
+    theme(legend.background = element_blank()) +
+    theme(legend.key = element_blank()) +
+    theme(legend.title = element_blank())}
+
+#The gprop argument controls whether we want general web, news, image or Youtube searches. 
+#The third argument time=all means we're searching from 2004 to now. Other time options 
+#include now 1-d, now 7-d, today 1-m, today 3-m, today 12-m, today+5-y. A final possibility 
+#for time is to specify a custom date range e.g. 2010-12-31 2011-06-30.  The geo is the area, 
+#here set to US. 
+#The glimpse function will summarize the results stored in our vector hurricanes. 
+hurricanes <- gtrends(c("katrina", "harvey"), time="all", gprop= "web", geo= c("US"))
+hurricanes %>% glimpse()
+
+#Plot the output using plot(). DIDNT WORK
+plot(hurricanes) + my_theme() + geom_line(size = 0.5)
+
+#Plotting more cyclical data. PLOT DOESN"T WORK.
+cycles <-gtrends(c("spring break", "vacation"), time= "2008-01-01 2018-01-01", 
+  gprop = "web", geo = c("US"))
+plot(cycles) + my_theme() + geom_line(size = 0.5)
+
+#Compare the interest in Hurrican Harvey in each state. 
+harvey <- gtrends(c("Harvey"), gprop = "web", time = "2017-08-18 2017-08-25", geo = c("US"))
+
+HarveyInterestByRegion <- as_tibble(harvey$interest_by_region)
+HarveyInterestByRegion <- HarveyInterestByRegion %>% 
+  dplyr::mutate(region = stringr::str_to_lower(location))
+
+#Fetch an empty map for plotting the geographical data. 
+statesMap = ggplot2::map_data("state")
+
+#Merge your google trends data with the underlying map data. Both datasets have a column called
+#"region" which will be used to merge the data frames. Note that the region labels need to be 
+#identical. Use the stringr function to chance capitalized state names to lower case. 
+#Note that we are plotting the log-transformed hits variable.  
+harveyMerged <- merge(statesMap, harvey, by = "region")
+harveyMerged <- HarveyInterestByRegion %>% dplyr::left_join(x = ., y = statesMap, by = "region")
+
+#Visualize the data. 
+harveyMerged %>% dplyr::glimpse(78)
+
+#Plot the data, but first, modify the ggplot theme for plotting maps. 
+my_theme2 = function() {
+  my_theme() +
+    theme(axis.title = element_blank()) +
+    theme(axis.text = element_blank()) +
+    theme(axis.ticks = element_blank())}
+
+harveyMerged %>% 
+  ggplot(aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group, 
+                   fill = log(hits)), 
+               colour = "white") +
+  scale_fill_gradientn(colours = rev(scico(15, 
+                                           palette = "tokyo")[2:7])) +
+  my_theme2() +
+  ggtitle("Google search interest for Hurricane Harvey\nin each state from the week prior to landfall in the US")
+
+#Tutorial from http://www.storybench.org/mapping-search-data-from-google-trends-in-r/
