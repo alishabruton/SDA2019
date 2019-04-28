@@ -1,0 +1,122 @@
+#Load data from the CDC's Youth Behavioral Surveillance Survey and view and summarize it. 
+mydata <- read.csv(url("http://bit.ly/berd_data_csv"))
+View(mydata)
+summary(mydata)
+dim(mydata)
+nrow(mydata)
+ncol(mydata)
+names(mydata)
+
+#Find the structure of the dataset. 
+str(mydata)
+
+#Single out the BMI data (column 6). Two ways. 
+mydata[,6]
+mydata$bmi
+
+#Histogram of numeric data. 
+hist(mydata$bmi)
+
+#Histogram with extra info like a title and x-axis label. 
+#Note spaces around equal signs. 
+hist(mydata$bmi, xlab = "BMI", main = "BMIs of students")
+
+#Make a boxplot of BMI vs. sex. 
+boxplot(mydata$bmi ~ mydata$sex, horizontal = TRUE, xlab="BMI", 
+  ylab= "sex", main = "BMIs of students by sex")
+
+#Make a scatterplot of weight vs bmi.
+plot(mydata$weight_kg, mydata$bmi)
+plot(mydata$weight_kg, mydata$bmi, xlab = "weight (kg))", ylab = "BMI", main = "BMI vs weight")
+
+#Summarize the BMI values. 
+summary(mydata$bmi)
+mean(mydata$bmi)
+sd(mydata$bmi)
+min(mydata$bmi)
+max(mydata$bmi)
+median(mydata$bmi)
+quantile(mydata$bmi, prob=c(0, .25, .5, .75, 1))
+
+#Add a new column to the dataframe with height, based on the values we have for BMI and weight. 
+mydata$height_m <-sqrt(mydata$weight_kg / mydata$bmi)
+mydata$height_m
+dim(mydata)
+names(mydata)
+
+#View only the 2nd and 6th columsn. 
+mydata[,c(2,6)]
+mydata[c("age", "bmi")]
+
+#View only data for people who are 14. 
+mydata[mydata$age == "14 years old",]
+
+#View only data for people with BMI<19. 
+mydata[mydata$bmi < 19,]
+
+#View grade and race for 15 years old only
+mydata[mydata$age == "15 years old", c("age", "grade", "race4")]
+
+#view age, sex, and BMI for students with BMI<19. 
+mydata[mydata$bmi < 19, c("age", "sex", "bmi")]
+
+#Create data frames for males and females seperately. 
+Female_only<-mydata[mydata$sex == "Female",]
+Female_only
+str(Female_only)
+Male_only<-mydata[mydata$sex == "Male",]
+Male_only
+str(Male_only)
+
+#BMIs and weights of males vs females via means, SD and range.  
+mean(Female_only$bmi)
+mean(Male_only$bmi)
+mean(Female_only$weight_kg)
+mean(Male_only$weight_kg)
+sd(Female_only$bmi)
+sd(Male_only$bmi)
+min(Female_only$bmi)
+min(Male_only$bmi)
+
+#Boxplots of bmi and weight by gender. 
+boxplot(Female_only$bmi ~ Female_only$weight_kg, horizontal = TRUE, xlab = "BMI", 
+  ylab= "weight_kg", main = "BMI vs weight for females")
+boxplot(Male_only$bmi ~ Male_only$weight_kg, horizontal = TRUE, xlab = "BMI", 
+  ylab= "weight_kg", main = "BMI vs weight for males")
+
+#Calculate the percentage bullied for each gender. 
+summary(Female_only$bullied_past_12mo)
+summary(Male_only$bullied_past_12mo)
+
+bullied_males<-Male_only[Male_only$bullied_past_12mo == TRUE,]
+nrow(bullied_males)
+bullied_boys_pct<-nrow(bullied_males) / nrow(Male_only)
+bullied_boys_pct*100
+
+bullied_females<-Female_only[Female_only$bullied_past_12mo == "TRUE",]
+nrow(bullied_females)
+bullied_females_pct<-nrow(bullied_females) / nrow(Female_only)
+bullied_females_pct
+
+#Examine whether students who were bullied in the past year are more l
+#ikely to have smoked? Does this vary by gender?
+bullied_yes<- mydata[mydata$bullied_past_12mo == TRUE,]
+bullied_no <-mydata[mydata$bullied_past_12mo == FALSE,]
+summary(bullied_yes$smoked_ever)
+summary(bullied_no$smoked_ever)
+
+summary(bullied_yes[bullied_yes$sex == "MALE", "smoked_ever"])
+summary(bullied_yes[bullied_yes$sex == "FEMALE", "smoked_ever"])
+summary(bullied_no[bullied_yes$sex == "MALE", "smoked_ever"])
+summary(bullied_no[bullied_yes$sex == "FEMALE", "smoked_ever"])
+
+#Save in an RDate file. 
+save(mydata, file = "mydata.DRdata")
+load("mydata.Rdata")
+
+#Save in a csv file. 
+write.csv(mydata, file = "mydata.csv", col.names = TRUE, row.names = FALSE)
+
+#Install tidyverse. 
+install.packages("tidyverse")
+library(tidyverse)
