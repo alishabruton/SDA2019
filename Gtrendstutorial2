@@ -74,7 +74,7 @@ harveyMerged <- HarveyInterestByRegion %>% dplyr::left_join(x = ., y = statesMap
 #Visualize the data. 
 harveyMerged %>% dplyr::glimpse(78)
 
-#Plot the data, but first, modify the ggplot theme for plotting maps. 
+#Plot the data, but first, modify the ggplot theme for plotting maps. WORKS! SO PRETTY. 
 my_theme2 = function() {
   my_theme() +
     theme(axis.title = element_blank()) +
