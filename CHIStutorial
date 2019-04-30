@@ -1,0 +1,48 @@
+#UCLA California Health Interview Survey Data. 
+#Using my brains and numerous tutorials online including this: 
+#https://stackoverflow.com/questions/27347548/r-assign-variable-labels-of-data-frame-columns
+
+#Loading an SPSS file into R. Convert it to a data frame, and convert factors into value labels. 
+library(foreign)
+AdultR <- read.spss("ADULT.sav", to.data.frame = TRUE, use.value.labels = TRUE)
+
+#Save the converted file as an R file. 
+save(AdultR, file = "AdultR.Rdata")
+
+#Find out how big the data frame is, and load it so you can see it. 
+nrow(AdultR)
+ncol(AdultR)
+View(AdultR)
+str(AdultR)
+summary(AdultR)
+
+#Make a table of variable names.  
+AdultR.labels <- as.data.frame(attr(AdultR, "variable.labels"))
+
+#Relabel the variables you want to use.
+#Asthma variables. 
+AsthmaEver <-AdultR$AB17
+AsthmaStill <-AdultR$AB40
+AsthmaStatus <- AdultR$ASTCUR
+
+#Financial variables. 
+CantPayMedBills <- AdultR$AH81B
+AvWalk <- AdultR$AD42W
+PovertyLevel <- AdultR$POVLL
+EBT <- AdultR$AL5
+CCdebt <- AdultR$AH86B
+MedBillsThisMo <-AdultR$AH81B
+RxCoverage <- AdultR$AI25
+
+#Exercise variables. 
+FreqExercise <- AdultR$AC100
+
+#Health care variables. 
+Hospital12mo <- AdultR$AH14
+MdVisitsThisMo <-AdultR$AH5
+
+#Correlation between asthma status, Rx coverage, and frequency of exercise in the past week. 
+model1<-lm(FreqExercise~AsthmaStatus + RxCoverage, data = AdultR)
+summary(model1)
+
+
