@@ -1,0 +1,63 @@
+#Week 5 class notes. Notes on chi-square from: http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r
+
+# Import the data
+file_path <- "http://www.sthda.com/sthda/RDoc/data/housetasks.txt"
+housetasks <- read.delim(file_path, row.names = 1)
+head(housetasks)
+
+#Install gplots package. Convert the data as a table, and then as a graph. 
+install.packages("gplots")
+library(gplots)
+
+#Table. Not a visual, you're just creating a variable here you use to make a balloon plot of. 
+dt <- as.table(as.matrix(housetasks))
+
+# Graph. Worked. Looks AWESOME. #Showmargins=FALSE hides the column and row totals. 
+balloonplot(t(dt), main ="housetasks", xlab ="", ylab="",
+            label = FALSE, show.margins = FALSE)
+
+#You can also view a contingency table as a mosaic plot. Use function mosaicplot() 
+#from the built-in R package graphics.
+library("graphics")
+mosaicplot(dt, shade = TRUE, las=2,
+           main = "housetasks")
+
+#Note that the surface of an element of the mosaic reflects the relative magnitude of its value. 
+#Blue color indicates that the observed value is higher than the expected value if the data were random. 
+#Red color specifies that the observed value is lower than the expected value if the data were random.
+
+#Easier way to do a Pearson's chi-square. 
+chisq<- chisq.test(housetasks)
+chisq
+
+#Can look at observed and expected counts. 
+#observed. 
+chisq$observed
+
+#Expected. 
+round(chisq$expected,2)
+
+#Get Pearson residuals. 
+round(chisq$residuals, 3)
+
+#Visualize Pearson residuals with the package corrplot. SO COOL LOOKING!!! 
+#For a given cell, the size of the circle is proportional to the amount of the cell contribution. 
+#Positive residuals are in blue, and negative residuals are in red.  
+install.packages("corrplot")
+library(corrplot)
+corrplot(chisq$residuals, is.cor = FALSE)
+
+#Find the contribution in percentages. 
+# Contibution in percentage (%)
+contrib <- 100*chisq$residuals^2/chisq$statistic
+round(contrib, 3)
+
+# Visualize the contribution
+corrplot(contrib, is.cor = FALSE)
+
+#Print p-value and mean. 
+# printing the p-value
+chisq$p.value
+# printing the mean
+chisq$estimate
+
