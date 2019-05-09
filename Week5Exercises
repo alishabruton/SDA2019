@@ -1,0 +1,67 @@
+#Week 5 Exercises using the LaCourse data. 
+summary(lacourse)
+
+#Make a X2 test with Marital Status of the parents and Suicide Risk of the teen. 
+marital <- lacourse$marital_status
+suicide <- lacourse$suicide_risk
+
+tab1 <- xtabs(~marital+suicide, data = lacourse)
+tab1
+prop.table(tab1,1)
+summary(tab1)
+
+#Run an elementary logistic regression with Suicide Risk as the outcome and Marital Status as the predictor. 
+mod1 <- glm(suicide~marital, family = binomial(logit), data = lacourse)
+summary(mod1)
+exp(confint(mod1))
+exp(coef(mod1))
+
+#Run a simple logistic regression with Liking Metal Music as a predictor of Suicide Risk. Liking Metal is a scale from 1-10, FYI. 
+metal <- lacourse$metal
+mod2 <- glm(suicide~metal, family = binomial(logit), data = lacourse)
+summary(mod2)
+exp(confint(mod2))
+exp(coef(mod2))
+
+#The only way I could get reasonable tables on the next question was to recode the metal interval variable as a factor.
+#Recode metal as a factor with two levels (not liking metal music with score <6, and liking metal with score >6). 
+metal2 <- factor(ifelse(lacourse$metal >6, "yes", "no"))
+summary(metal2)
+
+#Look at whether liking metal music differs between suicidal teens and non-suicidal teens. Use the recoded metal2, which is now a factor with two levels (yes and no).
+tab2 <- xtabs(~suicide+metal2, data = lacourse)
+tab2
+prop.table(tab2,1)
+summary(tab2)
+
+#Run independent samples t-tests, 5 times, to see if the following measures between suicidal and non-suicidal groups:Social Isolation, Meaninglessness, Normlessness, elf-Estrangement and Drug use. 
+#SI and Social Isolation
+isolation <- lacourse$isolation
+t.test(isolation~suicide, data = lacourse)
+
+#SI and Meaninglessness.
+meaningless <- lacourse$meaninglessness
+t.test(meaningless~suicide, data = lacourse)
+
+#SI and Normlessness. 
+normless <- lacourse$normlessness
+t.test(normless~suicide, data= lacourse)
+
+#SI and Self-Estrangement. 
+selfestrange <- lacourse$self_estrangement
+t.test(selfestrange~suicide, data=lacourse)
+
+#SI and Drug Use. 
+drugs <- lacourse$drug_use
+t.test(drugs~suicide, data= lacourse)
+
+#Run another logistic regression using only those variables identified as significant in the above t-tests. 
+mod4 <- glm(suicide~metal2 + normless + selfestrange + drugs, family = binomial(logit), data = lacourse)
+summary(mod4)
+exp(confint(mod4))
+exp(coef(mod4))
+
+#BONUS, run lrtest(model 2, model 4) to obtain a p value for the contribution of adding covariates. 
+install.packages("lmtest")
+library(lmtest)
+lrtest(mod2, mod4)
