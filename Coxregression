@@ -1,0 +1,62 @@
+#Cox Proportional Hazards Model
+
+#Univariate Cox Analysis
+#Install the packages
+install.packages(c("survival", "survminer"))
+
+#Load the packages
+library("survival") 
+library("survminer")
+
+#The function coxph()[in survival package] can be used to compute the 
+#Cox proportional hazards regression model in R. 
+#The simplified format is as follows:
+coxph(formula, data, method)
+
+#Explanation: 
+#formula: is linear model with a survival object as the response variable. 
+#Survival object is created using the function Surv() as follow: Surv(time, event).
+#data: a data frame containing the variables
+#method: is used to specify how to handle ties. The default is ‘efron’. 
+#Other options are ‘breslow’ and ‘exact’. The default ‘efron’ is generally 
+#preferred to the once-popular “breslow” method. The “exact” method is much more 
+#computationally intensive.
+
+#An example: We will compute univariate cox analysis using the lung data with 
+#covariates of age, sex, ph.ecog (prognostic score), and weight loss. 
+res.cox <- coxph(Surv(time, status) ~ sex, data = lung) 
+res.cox
+
+#That should give you a short report. 
+#This will give you a more complete report, with R2, concordance, Wald test, 
+#and logrank test. 
+summary(res.cox)
+
+#Multivariate Cox regression analysis
+#A Cox regression of time to death on the time-constant covariates is specified as follows; 
+res.cox <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data = lung) 
+summary(res.cox)
+
+#Visualizing the estimated distribution of survival times. 
+#The function surv(fit) estimates the survival proportion,  
+#by default at the mean values of covariates. 
+#Plot the baseline survival function. 
+ggsurvplot(survfit(res.cox), color = "#2E9FDF", ggtheme = theme_minimal())
+
+#We may wish to display how estimated survival depends upon the value of a 
+#covariate of interest.
+#Consider that, we want to assess the impact of the sex on the estimated 
+#survival probability. In this case, we construct a new data frame with two rows, 
+#one for each value of sex; the other covariates are fixed to their average values 
+#(if they are continuous variables) or to their lowest level (if they are discrete variables). 
+#For a dummy covariate, the average value is the proportion coded 1 in the data set. 
+This data frame is passed to survfit() via the newdata argument:
+
+# Create the new data 
+sex_df <- with(lung, data.frame(sex = c(1, 2), 
+  age = rep(mean(age, na.rm = TRUE), 2), ph.ecog = c(1, 1) ) ) 
+  sex_df
+
+# Survival curves 
+fit <- survfit(res.cox, newdata = sex_df) ggsurvplot(fit, conf.int = TRUE, legend.labs=c("Sex=1", "Sex=2"), 
+ggtheme = theme_minimal())
